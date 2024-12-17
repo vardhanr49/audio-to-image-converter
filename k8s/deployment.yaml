@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-to-image-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: audio-to-image-app
+  template:
+    metadata:
+      labels:
+        app: audio-to-image-app
+    spec:
+      containers:
+        - name: audio-to-image-app
+          image: <your-docker-image>
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: audio-volume
+              mountPath: /app/uploads
+            - name: image-volume
+              mountPath: /app/output_images
+      volumes:
+        - name: audio-volume
+          emptyDir: {}
+        - name: image-volume
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audio-to-image-service
+spec:
+  selector:
+    app: audio-to-image-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
